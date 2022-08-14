@@ -1,0 +1,20 @@
+local Range = 100
+local a = game:GetService("Workspace").Sell
+_G.Farm = not _G.Farm
+
+
+while _G.Farm and task.wait(1) do
+    for i,v in pairs(workspace:GetChildren()) do
+        if string.find(v.Name, "Wheat") and v:IsA("Model") then
+            if (game.Players.LocalPlayer.Character.PrimaryPart.Position - v:FindFirstChild("Primary").Position).Magnitude < Range then
+                for i2,v2 in pairs(v:GetChildren()) do
+                    if v2:IsA("Vector3Value") then
+                        game:GetService("ReplicatedStorage").RemoteEvents.Harvest:FireServer({v[v2.Name]})
+                        firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart,a,0)
+                        firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart,a,1)
+                    end
+                end
+            end
+        end
+    end
+end
