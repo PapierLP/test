@@ -12,6 +12,8 @@ _G.Farm = false
 _G.Sell = false
 _G.Speed = false
 _G.RWS = false
+_G.Rebirth = false
+_G.ESP = false
 -- // Tabs //
 local GeneralTab = PepsisWorld:CreateTab({
 Name = "General"
@@ -35,10 +37,12 @@ Name = "Misc"
 })
 -- // Local //
 local Range = 100
+Pets = {}
 -- // Functions // 
 InfoSection:AddLabel({Name = "Best Range is 100"})
 InfoSection:AddLabel({Name = "When using more then 100 you"})
 InfoSection:AddLabel({Name = "get a high ping!!!"})
+
 FarmingSection:AddSlider({Name = "Farming Range",Value = 100,Min = 0,Max = 125,Format = function(Value)
 	Range = Value
 	return "Farming Range: " .. tostring(Value)
@@ -52,16 +56,23 @@ FarmingSection:AddToggle({Name = "Rainbow Wheat Sniper",Callback = function(a)
     _G.RWS = a
 end}
 )
+FarmingSection:AddToggle({Name = "Auto Rebirth",Callback = function(a)
+    _G.Rebirth = a
+end}
+)
 FarmingSection:AddToggle({Name = "Auto Sell",Callback = function(a)
     _G.Sell = a
+end}
+)
+
+Misc:AddToggle({Name = "Pet ESP",Callback = function(a)
+    _G.ESP = a
 end}
 )
 Misc:AddToggle({Name = "Speed 100",Callback = function(a)
     _G.Speed = a
 end}
 )
-
-
 
 
 -- // MISC //
@@ -107,6 +118,45 @@ spawn(function()
             	if string.find(v.Name, "RainbowWheat") and v:IsA("Model") then
             	    local b = string.split(v.Name, "RainbowWheat")
             		game:GetService("ReplicatedStorage").RemoteEvents.Harvest:FireServer({v[b[2]]})
+                end
+            end
+        end
+    end
+end)
+spawn(function()
+    while wait() do
+        if _G.Rebirth then
+            game:GetService("ReplicatedStorage").RemoteFunctions.Rebirth:InvokeServer()
+        end
+    end
+end)
+spawn(function()
+    while wait() do
+        if _G.ESP then
+            for i,v in pairs(game:GetService("ReplicatedStorage").Pets:GetChildren()) do
+                if v.ClassName == "Model" then
+                    if not table.find(Pets,v.Name) then
+                        table.insert(Pets,v.Name)
+                    end
+                end
+            end
+            for __,v in pairs(workspace:GetChildren()) do -- the path
+                if table.find(Pets, v.Name) and not v:FindFirstChild("ElectricPPPGUI") then -- the item
+                    local a = Instance.new("BillboardGui",v) -- pretty much explains everything
+                    a.Name = "ElectricPPPGUI"
+                    a.Size = UDim2.new(10,0, 10,0)
+                    a.AlwaysOnTop = true
+                    local b = Instance.new("Frame",a)
+                    b.Size = UDim2.new(1,0, 1,0)
+                    b.BackgroundTransparency = 0.80
+                    b.BorderSizePixel = 0
+                    b.BackgroundColor3 = Color3.new(0, 255, 0)
+                    local c = Instance.new('TextLabel',b)
+                    c.Size = UDim2.new(2,0,2,0)
+                    c.BorderSizePixel = 0
+                    c.TextSize = 20
+                    c.Text = v.Name
+                    c.BackgroundTransparency = 1
                 end
             end
         end
