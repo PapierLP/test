@@ -16,6 +16,7 @@ _G.Rebirth = false
 _G.MRebirth = false
 _G.ESP = false
 _G.ATame = false
+_G.Gem = false
 -- // Tabs //
 local GeneralTab = PepsisWorld:CreateTab({
 Name = "General"
@@ -30,6 +31,9 @@ Name = "Info"
 local FarmingSection = GeneralTab:CreateSection({
 Name = "Farming"
 })
+local AutoBuy = GeneralTab:CreateSection({
+Name = "Buy Stuff"
+})
 local Misc = GeneralTab:CreateSection({
 Name = "Misc",
 Side = "Right"
@@ -43,6 +47,8 @@ Name = "Misc"
 })
 -- // Local //
 local Range = 100
+local CFrameEnd = CFrame.new(0, 0, 0) -- Place your coords in here
+local Time = 8
 Pets = {}
 -- // Functions // 
 InfoSection:AddLabel({Name = "Best Range is 100"})
@@ -58,19 +64,32 @@ FarmingSection:AddToggle({Name = "Auto Farm",Callback = function(a)
     _G.Farm = a
 end}
 )
+FarmingSection:AddToggle({Name = "AI Farm",Callback = function(a)
+    _G.AI = a
+end}
+)
 FarmingSection:AddToggle({Name = "Rainbow Wheat Sniper",Callback = function(a)
     _G.RWS = a
 end}
 )
-FarmingSection:AddToggle({Name = "Auto Rebirth",Callback = function(a)
+FarmingSection:AddToggle({Name = "Auto Collect Gems",Callback = function(a)
+    _G.Gems = a
+end}
+)
+
+AutoBuy:AddToggle({Name = "Auto Buy lvl 10 Tool",Callback = function(a)
+    _G.ATool = a
+end}
+)
+AutoBuy:AddToggle({Name = "Auto Rebirth",Callback = function(a)
     _G.Rebirth = a
 end}
 )
-FarmingSection:AddToggle({Name = "Auto Mega Rebirth",Callback = function(a)
+AutoBuy:AddToggle({Name = "Auto Mega Rebirth",Callback = function(a)
     _G.MRebirth = a
 end}
 )
-FarmingSection:AddToggle({Name = "Auto Sell",Callback = function(a)
+AutoBuy:AddToggle({Name = "Auto Sell",Callback = function(a)
     _G.Sell = a
 end}
 )
@@ -153,11 +172,67 @@ spawn(function()
 end)
 spawn(function()
     while wait() do
+        if _G.AI then
+		    CFrameEnd = CFrame.new(548, 46, -273)
+            local tween =  game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(Time), {CFrame = CFrameEnd})
+            tween:Play()
+            tween.Completed:Wait()
+            
+            CFrameEnd = CFrame.new(548, 46, 296)
+            local tween =  game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(Time), {CFrame = CFrameEnd})
+            tween:Play()
+            tween.Completed:Wait()
+            
+            CFrameEnd = CFrame.new(-11, 46, 296)
+            local tween =  game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(Time), {CFrame = CFrameEnd})
+            tween:Play()
+            tween.Completed:Wait()
+            
+            CFrameEnd = CFrame.new(-11, 46, -273)
+            local tween =  game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(Time), {CFrame = CFrameEnd})
+            tween:Play()
+            tween.Completed:Wait()
+        end
+    end
+end)
+spawn(function()
+    while wait() do
+        if _G.Gems then
+            for i,v in pairs(workspace:GetChildren()) do
+                if v.Name == "Crystal" then
+                    firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart,v,0)
+                    firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart,v,1)
+                end
+            end
+        end
+    end
+end)
+spawn(function()
+    while wait() do
         if _G.RWS then
             for i,v in pairs(workspace:GetChildren()) do
             	if string.find(v.Name, "RainbowWheat") and v:IsA("Model") then
             	    local b = string.split(v.Name, "RainbowWheat")
             		game:GetService("ReplicatedStorage").RemoteEvents.Harvest:FireServer({v[b[2]]})
+                end
+            end
+        end
+    end
+end)
+spawn(function()
+    while wait() do
+        if _G.ATool then
+            local a = game:GetService("ReplicatedStorage").RemoteFunctions.GetData:InvokeServer()
+            local Harvester = {}
+            for i,v in pairs(a.HarvesterLevels) do
+            	if not table.find(Harvester,i) then
+                    table.insert(Harvester,i)
+                end
+            end
+            
+            for i,v in pairs(game:GetService("ReplicatedStorage").Harvesters:GetChildren()) do
+                if not table.find(Harvester,v.Name) then
+                    game:GetService("ReplicatedStorage").RemoteFunctions.Purchase:InvokeServer(v.Name,10)
                 end
             end
         end
