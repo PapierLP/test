@@ -13,7 +13,9 @@ _G.Sell = false
 _G.Speed = false
 _G.RWS = false
 _G.Rebirth = false
+_G.MRebirth = false
 _G.ESP = false
+_G.ATame = false
 -- // Tabs //
 local GeneralTab = PepsisWorld:CreateTab({
 Name = "General"
@@ -30,6 +32,10 @@ Name = "Farming"
 })
 local Misc = GeneralTab:CreateSection({
 Name = "Misc",
+Side = "Right"
+})
+local Pet = GeneralTab:CreateSection({
+Name = "Pet",
 Side = "Right"
 })
 local MiscSection = MiscTab:CreateSection({
@@ -60,21 +66,55 @@ FarmingSection:AddToggle({Name = "Auto Rebirth",Callback = function(a)
     _G.Rebirth = a
 end}
 )
+FarmingSection:AddToggle({Name = "Auto Mega Rebirth",Callback = function(a)
+    _G.MRebirth = a
+end}
+)
 FarmingSection:AddToggle({Name = "Auto Sell",Callback = function(a)
     _G.Sell = a
 end}
 )
+local selectedPet
+local PetList = {"Bot Overlord","Angelfly","Zombie Dragon","Buttermyths","Octohex","Ultimus","Light Dragon","Zap"}
+Pet:AddSearchBox({
+  Name="Pets to Buy",
+  List=PetList,
+  Callback=function(value)
+      selectedPet=value
+      print(value)
+      end
+})
 
-Misc:AddToggle({Name = "Pet ESP",Callback = function(a)
+Pet:AddTextbox({
+Name = "Add Pet",
+    Callback=function(value)
+      table.insert(PetList,value)
+    end
+})
+Pet:AddButton({
+Name = "Remove Selected Pet",
+Callback = function()
+table.remove(PetList, table.find(PetList, selectedPet))
+end
+})
+
+
+Pet:AddToggle({Name = "Pet ESP",Callback = function(a)
     _G.ESP = a
 end}
 )
+Pet:AddLabel({Name = "Rejoin to see the Pets"})
+Pet:AddToggle({Name = "Tame Pets From Dropdown",Callback = function(a)
+    _G.ATame = a
+end}
+)
+
+
+
 Misc:AddToggle({Name = "Speed 100",Callback = function(a)
     _G.Speed = a
 end}
 )
-
-
 -- // MISC //
 MiscSection:AddSlider({Name = "FOV",Value = 70,Min = 0,Max = 200,Format = function(Value)
 	game:GetService'Workspace'.Camera.FieldOfView = Value
@@ -132,6 +172,13 @@ spawn(function()
 end)
 spawn(function()
     while wait() do
+        if _G.MRebirth then
+            game:GetService("ReplicatedStorage").RemoteFunctions.Rebirth:InvokeServer(true)
+        end
+    end
+end)
+spawn(function()
+    while wait() do
         if _G.ESP then
             for i,v in pairs(game:GetService("ReplicatedStorage").Pets:GetChildren()) do
                 if v.ClassName == "Model" then
@@ -157,6 +204,17 @@ spawn(function()
                     c.TextSize = 20
                     c.Text = v.Name
                     c.BackgroundTransparency = 1
+                end
+            end
+        end
+    end
+end)
+spawn(function()
+    while wait() do
+        if _G.ATame then
+			for i,v in pairs(workspace:GetChildren()) do
+                if table.find(PetList, v.Name) then
+                    game:GetService("ReplicatedStorage").RemoteFunctions.Tame:InvokeServer(v,v.Name)
                 end
             end
         end
